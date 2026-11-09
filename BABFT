@@ -1,0 +1,359 @@
+-- =================================================================
+-- PART 2026: DAILY KEY SYSTEM (AUTO RESET SETIAP HARI + LINK GENERATOR)
+-- =================================================================
+local KeyDiverifikasi = false
+local KeyPermanen = "NZM" -- Kunci bypass tetap Anda
+
+-- 1. MENDETEKSI TANGGAL HARI INI SECARA REAL-TIME
+-- os.date("*t") mengambil data waktu dunia nyata (WIB/GMT sesuai server/device)
+local waktuSekarang = os.date("*t")
+local teksTanggal = tostring(waktuSekarang.day) .. tostring(waktuSekarang.month) .. tostring(waktuSekarang.year)
+
+-- 2. LOGIKA GENERATOR KEY ACAK HARIAN SECARA MATEMATIS
+-- Menggunakan rumus matematika math.randomseed berdasarkan tanggal hari ini.
+-- Hasilnya: Sepanjang hari ini Key-nya akan sama, tapi besok otomatis berubah total!
+math.randomseed(tonumber(teksTanggal)) 
+local function BuatKeyHarian()
+    local karakter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    local hasilAcak = ""
+    for i = 1, 5 do
+        local randIndex = math.random(1, #karakter)
+        hasilAcak = hasilAcak .. string.sub(karakter, randIndex, randIndex)
+    end
+    return "NZM-KEY-" .. hasilAcak
+end
+
+local KeyAcakHariIni = BuatKeyHarian()
+
+-- 3. DAFTAR LINK KEY HARIAN (Bisa Anda sesuaikan polanya)
+-- Setiap hari link-nya akan berubah ujungnya mengikuti format tanggal, contoh: ...?date=9112026
+local LinkKeyHariIni = "https://link-kamu-disini.com" .. teksTanggal 
+
+-- MENAMPILKAN KEY DI DEVELOPER CONSOLE (F9) JIKA ANDA INGIN MENGECEKNYA
+print("====================================")
+print("[NZM HARIAN ENGINE]")
+print("KEY HARI INI: " .. KeyAcakHariIni)
+print("LINK HARI INI: " .. LinkKeyHariIni)
+print("====================================")
+
+-- 4. LOGIKA PEMBUATAN INTERFACE GUI KEY SYSTEM
+local function BukaKeySystem()
+    local KeyGui = Instance.new("ScreenGui")
+    local Frame = Instance.new("Frame")
+    local Input = Instance.new("TextBox")
+    local Submit = Instance.new("TextButton")
+    local GetLinkButton = Instance.new("TextButton")
+    local Judul = Instance.new("TextLabel")
+    local InfoLabel = Instance.new("TextLabel")
+
+    KeyGui.Name = "DeltaKeySystem"
+    KeyGui.Parent = game.CoreGui
+
+    Frame.Size = UDim2.new(0, 320, 0, 210)
+    Frame.Position = UDim2.new(0.5, -160, 0.5, -105)
+    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Frame.Parent = KeyGui
+    Frame.Active = false      
+    Frame.Draggable = false   -- Tetap terkunci, tidak bisa digeser
+
+    Judul.Size = UDim2.new(1, 0, 0, 40)
+    Judul.Text = "SYSTEM VERIFIKASI KEY"
+    Judul.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Judul.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Judul.Font = Enum.Font.SourceSansBold
+    Judul.TextSize = 16
+    Judul.Parent = Frame
+
+    InfoLabel.Size = UDim2.new(1, 0, 0, 25)
+    InfoLabel.Position = UDim2.new(0, 0, 0, 45)
+    InfoLabel.Text = "*Key otomatis berganti baru setiap hari (24 Jam)!"
+    InfoLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    InfoLabel.BackgroundTransparency = 1
+    InfoLabel.Font = Enum.Font.SourceSansItalic
+    InfoLabel.TextSize = 12
+    InfoLabel.Parent = Frame
+
+    -- TOMBOL UNTUK MENYALIN LINK KEY HARIAN
+    GetLinkButton.Size = UDim2.new(0, 260, 0, 30)
+    GetLinkButton.Position = UDim2.new(0.5, -130, 0.4, 0)
+    GetLinkButton.Text = "🔗 SALIN LINK GET KEY 🔗"
+    GetLinkButton.BackgroundColor3 = Color3.fromRGB(40, 106, 255)
+    GetLinkButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    GetLinkButton.Font = Enum.Font.SourceSansBold
+    GetLinkButton.TextSize = 13
+    GetLinkButton.Parent = Frame
+
+    Input.Size = UDim2.new(0, 260, 0, 35)
+    Input.Position = UDim2.new(0.5, -130, 0.58, 5)
+    Input.PlaceholderText = "Ketik Kunci Acak / Permanen..."
+    Input.Text = ""
+    Input.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Input.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Input.Font = Enum.Font.SourceSans
+    Input.TextSize = 14
+    Input.Parent = Frame
+
+    Submit.Size = UDim2.new(0, 140, 0, 35)
+    Submit.Position = UDim2.new(0.5, -70, 0.8, 10)
+    Submit.Text = "SUBMIT VERIFIKASI"
+    Submit.BackgroundColor3 = Color3.fromRGB(0, 140, 0)
+    Submit.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Submit.Font = Enum.Font.SourceSansBold
+    Submit.TextSize = 14
+    Submit.Parent = Frame
+
+    -- Aksi klik tombol salin link
+    GetLinkButton.MouseButton1Click:Connect(function()
+        -- setclipboard adalah fungsi bawaan Delta Executor untuk menyalin teks otomatis ke HP/PC
+        if setclipboard then
+            setclipboard(LinkKeyHariIni)
+            GetLinkButton.Text = "✔ LINK BERHASIL DISALIN!"
+            GetLinkButton.BackgroundColor3 = Color3.fromRGB(46, 139, 87)
+            task.wait(2)
+            GetLinkButton.Text = "🔗 SALIN LINK GET KEY 🔗"
+            GetLinkButton.BackgroundColor3 = Color3.fromRGB(40, 106, 255)
+        else
+            GetLinkButton.Text = "Executor Anda tidak support Salin otomatis"
+        end
+    end)
+
+    Submit.MouseButton1Click:Connect(function()
+        -- Memverifikasi input dengan Key Acak Harian ATAU Key Permanen NZM
+        if Input.Text == KeyAcakHariIni or Input.Text == KeyPermanen then
+            KeyDiverifikasi = true
+            KeyGui:Destroy()
+        else
+            Input.Text = ""
+            Input.PlaceholderText = "KUNCI AKSES SALAH / KADALUWARSA!"
+            Input.PlaceholderColor3 = Color3.fromRGB(220, 50, 50)
+        end
+    end)
+end
+
+BukaKeySystem()
+while not KeyDiverifikasi do task.wait(0.5) end
+
+local stages = {
+    [1] = CFrame.new(-14.241774, 26.622606, 1364.338379, -0.020297, -0.506155, 0.862204, -0.000000, 0.862381, 0.506259, -0.999794, 0.010275, -0.017503),
+    [2] = CFrame.new(3.665485, 31.618034, 2133.135986, -0.015757, -0.509191, 0.860509, -0.000000, 0.860616, 0.509255, -0.999776, 0.008025, -0.013561),
+    [3] = CFrame.new(8.441872, 52.658176, 2902.652832, -0.043082, -0.197386, 0.979379, 0.000000, 0.980289, 0.197569, -0.999072, 0.008512, -0.042233),
+    [4] = CFrame.new(-17.868896, 69.207741, 3679.890625, -0.011372, -0.553590, 0.832712, -0.000000, 0.832766, 0.553625, -0.999935, 0.006296, -0.009471),
+    [5] = CFrame.new(-11.043743, 36.730087, 4445.333496, -0.020378, -0.602000, 0.798236, -0.000000, 0.798402, 0.602125, -0.999792, 0.012270, -0.016270),
+    [6] = CFrame.new(10.835979, 46.826912, 5217.289551, -0.043027, -0.508807, 0.859805, -0.000000, 0.860602, 0.509279, -0.999074, 0.021913, -0.037029),
+    [7] = CFrame.new(-40.286644, 39.011356, 5984.904297, -0.052142, -0.676313, 0.734766, -0.000000, 0.735767, 0.677234, -0.998640, 0.035312, -0.038365),
+    [8] = CFrame.new(-5.851148, 32.655327, 6763.844727, -0.038430, -0.561899, 0.826313, -0.000000, 0.826924, 0.562314, -0.999261, 0.021610, -0.031779),
+    [9] = CFrame.new(7.561937, 59.959263, 7529.362305, -0.042934, -0.487576, 0.872024, 0.000000, 0.872829, 0.488026, -0.999078, 0.020953, -0.037474),
+    [10] = CFrame.new(-23.380148, 48.091366, 8305.114258, -0.038225, -0.650570, 0.758483, 0.000000, 0.759038, 0.651046, -0.999269, 0.024887, -0.029015),
+    Chest = CFrame.new(-50.753761, -358.068146, 9499.310547, -0.809536, 0.440671, -0.387893, 0.000000, 0.660726, 0.750628, 0.587071, 0.607660, -0.534881)
+}
+
+_G.AutoFarmEmas = false
+local TweenService = game:GetService("TweenService")
+local StatusTeks = nil
+
+local function terbangKe(cframeTarget, kecepatanKustom)
+    local player = game.Players.LocalPlayer
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return false end
+    
+    local rootPart = player.Character.HumanoidRootPart
+    local kecepatan = kecepatanKustom or 160 -- Kecepatan meluncur standar
+    local jarak = (rootPart.Position - cframeTarget.Position).Magnitude
+    local durasi = jarak / kecepatan
+    
+    -- Efek Anti Gravitasi Melayang
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = Vector3.new(0, 0, 0)
+    bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    bv.Parent = rootPart
+    
+    -- Loop Noclip Aktif Selama Terbang
+    local noclipLoop = game:GetService("RunService").Stepped:Connect(function()
+        if player.Character then
+            for _, child in pairs(player.Character:GetChildren()) do
+                if child:IsA("BasePart") then child.CanCollide = false end
+            end
+        end
+    end)
+    
+    local tweenInfo = TweenInfo.new(durasi, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(rootPart, tweenInfo, {CFrame = cframeTarget})
+    tween:Play()
+    
+    local sukses = false
+    tween.Completed:Connect(function() sukses = true end)
+    
+    while not sukses do
+        task.wait(0.1)
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then break end
+        if not _G.AutoFarmEmas and kecepatanKustom == nil then break end -- Putus paksa jika tombol dimatikan manual
+        if sukses then break end
+    end
+    
+    bv:Destroy()
+    noclipLoop:Disconnect()
+    return sukses
+end
+
+task.spawn(function()
+    while true do
+        task.wait(1)
+        if _G.AutoFarmEmas then
+            local player = game.Players.LocalPlayer
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.Humanoid.Health > 0 then
+                
+                -- Proses terbang melewati 10 Stage utama beruntun
+                for i = 1, 10 do
+                    if not _G.AutoFarmEmas then break end
+                    if StatusTeks then StatusTeks.Text = "Farm: Menuju Stage " .. i end
+                    terbangKe(stages[i])
+                    task.wait(0.1)
+                end
+                
+                -- Klaim Peti Akhir
+                if _G.AutoFarmEmas and stages.Chest then
+                    if StatusTeks then StatusTeks.Text = "Farm: Mengambil Peti..." end
+                    terbangKe(stages.Chest, 100) 
+                    task.wait(7) -- Memberi server waktu mentransfer gold
+                    
+                    if player.Character and player.Character:FindFirstChild("Humanoid") then
+                        player.Character.Humanoid.Health = 0 -- Reset tubuh untuk respawn ke markas
+                    end
+                end
+                
+                if StatusTeks then StatusTeks.Text = "Farm: Menunggu Respawn..." end
+                player.CharacterAdded:Wait()
+                task.wait(3) -- Delay pengaman pasca-respawn
+            end
+        end
+    end
+end)
+
+local oldUI = game.CoreGui:FindFirstChild("DeltaStageGuiTween")
+if oldUI then oldUI:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TitleLabel = Instance.new("TextLabel")
+local CloseButton = Instance.new("TextButton")
+local OpenButton = Instance.new("TextButton")
+local ScrollingFrame = Instance.new("ScrollingFrame")
+local UIListLayout = Instance.new("UIListLayout")
+
+ScreenGui.Name = "DeltaStageGuiTween"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
+
+StatusTeks = Instance.new("TextLabel")
+StatusTeks.Parent = MainFrame
+StatusTeks.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+StatusTeks.Position = UDim2.new(0, 0, 0, 30)
+StatusTeks.Size = UDim2.new(1, 0, 0, 20)
+StatusTeks.Font = Enum.Font.SourceSansItalic
+StatusTeks.Text = "Status: Bot Siap"
+StatusTeks.TextColor3 = Color3.fromRGB(200, 200, 200)
+StatusTeks.TextSize = 13
+
+OpenButton.Parent = ScreenGui
+OpenButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+OpenButton.Position = UDim2.new(0, 15, 0.4, 0)
+OpenButton.Size = UDim2.new(0, 95, 0, 35)
+OpenButton.Font = Enum.Font.SourceSansBold
+OpenButton.Text = "Buka Menu"
+OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenButton.TextSize = 13
+OpenButton.Visible = false
+
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -135)
+MainFrame.Size = UDim2.new(0, 250, 0, 280)
+MainFrame.Active = true
+MainFrame.Draggable = true -- MENU UTAMA INI TETAP DRAGGABLE AGAR BISA DIGESER PLAYER
+
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+TitleLabel.Size = UDim2.new(1, 0, 0, 30)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.Text = "  BABFT NZM HACK"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+TitleLabel.TextSize = 14
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+CloseButton.Parent = MainFrame
+CloseButton.BackgroundColor3 = Color3.fromRGB(210, 60, 60)
+CloseButton.Position = UDim2.new(1, -30, 0, 0)
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+ScrollingFrame.Parent = MainFrame
+ScrollingFrame.BackgroundTransparency = 1
+ScrollingFrame.Position = UDim2.new(0, 10, 0, 55)
+ScrollingFrame.Size = UDim2.new(1, -20, 1, -65)
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollingFrame.ScrollBarThickness = 5
+
+UIListLayout.Parent = ScrollingFrame
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 6)
+
+local function buatTombol(namaDisplay, scriptFungsi, warnaTombol)
+    local Button = Instance.new("TextButton")
+    Button.Parent = ScrollingFrame
+    Button.BackgroundColor3 = warnaTombol or Color3.fromRGB(65, 65, 65)
+    Button.Size = UDim2.new(1, 0, 0, 32)
+    Button.Font = Enum.Font.SourceSansBold
+    Button.Text = namaDisplay
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextSize = 14
+    
+    Button.MouseButton1Click:Connect(function() pcall(scriptFungsi) end)
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+    return Button
+end
+
+-- 1. Tombol Switch Utama Kontrol Auto Farm
+local TombolFarm = nil
+TombolFarm = buatTombol("MULAI AUTO FARM EMAS", function()
+    _G.AutoFarmEmas = not _G.AutoFarmEmas
+    if _G.AutoFarmEmas then
+        TombolFarm.Text = "BERHENTIKAN AUTO FARM"
+        TombolFarm.BackgroundColor3 = Color3.fromRGB(178, 34, 34)
+    else
+        TombolFarm.Text = "MULAI AUTO FARM EMAS"
+        TombolFarm.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
+        StatusTeks.Text = "Status: Bot Dihentikan"
+    end
+end, Color3.fromRGB(34, 139, 34))
+
+-- Pembatas Antar Kategori Menu
+buatTombol("--- TELEPORT MANUAL ---", function() end, Color3.fromRGB(28, 28, 28))
+
+-- 2. Membangun Tombol Manual Terbang ke Stage 1 - 10
+for i = 1, 10 do
+    if stages[i] then
+        buatTombol("Terbang ke Stage " .. i, function() 
+            if StatusTeks then StatusTeks.Text = "Manual: Terbang ke Stg " .. i end
+            terbangKe(stages[i]) 
+        end)
+    end
+end
+
+-- 3. Membangun Tombol Manual Terbang ke Peti Akhir
+if stages.Chest then
+    buatTombol("🎁 TERBANG KE PETI 🎁", function() 
+        if StatusTeks then StatusTeks.Text = "Manual: Terbang ke Peti" end
+        terbangKe(stages.Chest, 100) 
+    end, Color3.fromRGB(184, 134, 11))
+end
+
+CloseButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    OpenButton.Visible = true
+end)
+
+OpenButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    OpenButton.Visible = false
+end)
